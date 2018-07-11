@@ -1,9 +1,12 @@
 # coding:utf-8
 
+from __future__ import print_function
+
 import serial
 import micropyGPS
 import threading
 import time
+import json
 
 #引数はタイムゾーンの時差と出力フォーマット
 #MicroGPSオブジェクトを生成する。
@@ -26,6 +29,7 @@ gpsthread.start() # スレッドを起動
 while True:
     if gps.clean_sentences > 20: # ちゃんとしたデーターがある程度たまったら出力する
         h = gps.timestamp[0] if gps.timestamp[0] < 24 else gps.timestamp[0] - 24
+        '''
         print('%2d:%02d:%04.1f' % (h, gps.timestamp[1], gps.timestamp[2]))
         print('緯度経度: %2.8f, %2.8f' % (gps.latitude[0], gps.longitude[0]))
         print('海抜: %f' % gps.altitude)
@@ -34,4 +38,17 @@ while True:
         for k, v in gps.satellite_data.items():
             print('%d: %s' % (k, v))
         print('')
+        '''
+        print("{")
+        print('"time": %2d:%02d:%04.1f,' % (h, gps.timestamp[1], gps.timestamp[2]))
+        print('"lat": %2.8f,' % (gps.latitude[0]))
+        print('"long": %2.8f,' % (gps.longitude[0]))
+        print('"alt": %f,' % gps.altitude)
+        print('"used_sats": ', end="")
+        print(gps.satellites_used, end="")
+        print(',')
+        print('"sats":')
+        sats = json.dumps(gps.satellite_data.items())
+        print(sats)
+        print("}")
     time.sleep(3.0)
